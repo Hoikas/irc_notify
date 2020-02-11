@@ -7,17 +7,10 @@ on:
     branches: [master]
     types: [opened, closed, ready_for_review]
 
-env:
-  channel: "#notifications_test"
-  nick: Neferus
-  server: irc.guildofwriters.org 
-  port: 6667
-  filename: notify_irc.py 
-
 jobs:
   notification:
     env:
-      send_message: python3 ${{ env.filename }} --server ${{ env.server }} --channel ${{ env.channel }} -p ${{ env.port }} --no-join --message
+      send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --no-join --message
 
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +19,7 @@ jobs:
         
       - name: Write Script
         run: |
-          cat << EOF > ${{ env.filename }}
+          cat << EOF > notify_irc.py
           #! /usr/bin/env python
 
           import argparse
