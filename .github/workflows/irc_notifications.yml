@@ -15,7 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies
-        run: pip3 install pure-sasl pydle
+        run: |
+          sudo apt update
+          sudo apt install python3-setuptools
+          pip3 install pure-sasl pydle
         
       - name: Write Script
         run: |
