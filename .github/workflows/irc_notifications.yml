@@ -2,11 +2,11 @@ name: Notifications
 on: [push]
 
 env:
-  channel: "#notifications_test"
-  nickname: Neferus
-  server: irc.guildofwriters.org 
-  port: 6667
-  tls: false
+  CHANNEL: "#notifications_test"
+  NICK: Neferus
+  SERVER: irc.guildofwriters.org 
+  PORT: 6667
+  TLS: false
 
 jobs:
   notification:
@@ -17,5 +17,10 @@ jobs:
       - name: Notification
         uses: rectalogic/notify-irc@v1
         with:
+          channel: $CHANNEL
+          nickname: $NICK
+          server: $SERVER 
+          port: $PORT
+          tls: $TLS
           message: |-
             ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
