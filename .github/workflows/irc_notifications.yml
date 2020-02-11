@@ -14,6 +14,7 @@ jobs:
           channel: "#notifications_test"
           nickname: Neferus
           server: irc.guildofwriters.org 
-          port: 6667  
+          port: 6667
+          tls: false  
           message: |-
             ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
