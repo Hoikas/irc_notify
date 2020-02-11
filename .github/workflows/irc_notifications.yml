@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
-          sudo apt install python3-setuptools
+          sudo apt install python3-setuptools python3-uvloop
           pip3 install pydle
         
       - name: Write Script
@@ -32,6 +32,13 @@ jobs:
           import logging
 
           import pydle
+          try:
+              import uvloop
+          except ImportError:
+              pass
+          else:
+              import asyncio
+              asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
           log = logging.getLogger(__name__)
 
