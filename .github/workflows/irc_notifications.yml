@@ -11,7 +11,7 @@ jobs:
   notification:
     env:
       send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --nickname Neferus --no-join --message
-      whodoneit: "\u0002{{ github.actor }}\u0002" 
+      whodoneit: "\u0002${{ github.actor }}\u0002" 
 
     runs-on: ubuntu-latest
     steps:
