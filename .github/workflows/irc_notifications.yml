@@ -10,7 +10,7 @@ on:
 env:
   channel: "#notifications_test"
   nick: Neferus
-  notice: true
+  notice: false
   server: irc.guildofwriters.org 
   port: 6667
   tls: false
