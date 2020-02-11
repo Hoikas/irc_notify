@@ -11,7 +11,9 @@ jobs:
   notification:
     env:
       send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --nickname Neferus --no-join --message
-      whodoneit: "\u0002${{ github.actor }}\u0002" 
+
+      forcepush: "\x02\x0304force-pushed\x0f"
+      whodoneit: "\x02${{ github.actor }}\x02" 
 
     runs-on: ubuntu-latest
     steps:
@@ -129,10 +131,15 @@ jobs:
           if __name__ == "__main__":
               main()
         
-      - name: Push
-        if: github.event_name == 'push'
-        run: > 
+      - name: Push (Normal)
+        if: github.event_name == 'push' && !github.event.forced
+        run: >
           ${{ env.send_message }} "${{ env.whodoneit }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
+
+      - name: Push (Force)
+        if: github.event_name == 'push' && github.event.forced
+        run: >
+          ${{ env.send_message }} "${{ env.whodoneit }} has ${{ env.forcepush }} to ${{ github.repository }}: ${{ github.event.compare }}."
           
       - name: PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
