@@ -2,9 +2,10 @@ name: Notifications
 on: [push]
 
 env:
+  irc_action: Gottox/irc-message-action@v1 
   channel: "#notifications_test"
   nick: Neferus
-  notice: true 
+  notice: false 
   server: irc.guildofwriters.org 
   port: 6667
   tls: false
@@ -16,7 +17,7 @@ jobs:
 
     steps:
       - name: Notification
-        uses: rectalogic/notify-irc@v1
+        uses: ${{ env.irc_action }}
         with:
           channel: ${{ env.channel }}
           nickname: ${{ env.nick }}
