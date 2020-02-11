@@ -1,6 +1,12 @@
-name: CI
-
+name: Notifications
 on: [push]
+
+irc_settings: &irc_settings
+  channel: "#notifications_test"
+  nickname: Neferus
+  server: irc.guildofwriters.org 
+  port: 6667
+  tls: false
 
 jobs:
   notification:
@@ -11,10 +17,6 @@ jobs:
       - name: Notification
         uses: rectalogic/notify-irc@v1
         with:
-          channel: "#notifications_test"
-          nickname: Neferus
-          server: irc.guildofwriters.org 
-          port: 6667
-          tls: false  
+          <<: *irc_settings  
           message: |-
             ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
