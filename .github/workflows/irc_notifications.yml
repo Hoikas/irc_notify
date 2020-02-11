@@ -1,4 +1,4 @@
-name: Notifications
+name: "IRC Notifications"
 
 on:
   push:
@@ -25,26 +25,26 @@ jobs:
         # On push
         if: github.event_name == "push"
         env:
-          message: -|
-            ${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}.
+          message: |
+            "${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
         
         # On opening a pull request
         if: github.event_name == "pull_request" && github.event.action == "opened"
         env:
-          message: -|
-            ${{ github.actor }} has opened pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}.
+          message: |
+            "${{ github.actor }} has opened pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
         
         # On closing a pull request (not merged)
         if: github.event_name == "pull_request" && github.event.action == "closed" && !github.event.pull_request.merged
         env:
-          message: -|
-            ${{ github.actor }} has closed pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}.
+          message: |
+            "${{ github.actor }} has closed pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
 
         # On merging a pull request
         if: github.event_name == "pull_request" && github.event.action == "closed" && github.event.pull_request.merged
         env:
-          message: -|
-            ${{ github.actor }} has merged pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}.
+          message: |
+            "${{ github.actor }} has merged pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
 
         with:
           channel: ${{ env.channel }}
