@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
-          sudo apt install python3-setuptools python3-uvloop
+          sudo apt install python3-setuptools
           pip3 install pydle
         
       - name: Write Script
