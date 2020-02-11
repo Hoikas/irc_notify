@@ -1,7 +1,7 @@
 name: Notifications
 on: [push]
 
-irc_settings: &irc_settings
+env:
   channel: "#notifications_test"
   nickname: Neferus
   server: irc.guildofwriters.org 
@@ -17,6 +17,5 @@ jobs:
       - name: Notification
         uses: rectalogic/notify-irc@v1
         with:
-          <<: *irc_settings  
           message: |-
             ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
