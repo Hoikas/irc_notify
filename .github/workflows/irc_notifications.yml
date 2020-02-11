@@ -11,7 +11,7 @@ jobs:
       - name: Notification
         uses: Gottox/irc-message-action@v1
         with:
-          channel: '#notifications_test'
+          channel: ''##notifications_test'
           nickname: Neferus
           server: guildofwriters.org 
           port: 6667  
