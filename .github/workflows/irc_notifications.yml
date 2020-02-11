@@ -151,14 +151,14 @@ jobs:
       - name: PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: >
-          ${{ env.send_message }} "${{ env.whodoneit }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+          ${{ env.send_message }} "${{ env.whodoneit }} has opened pull request #${{ github.event.number }} (${{ github.event.pull_request.title }}): ${{ github.event.pull_request.html_url }}."
               
       - name: PR Closed
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && !github.event.pull_request.merged
         run: >
-          ${{ env.send_message }} "${{ env.whodoneit }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+          ${{ env.send_message }} "${{ env.whodoneit }} has closed pull request #${{ github.event.number }} (${{ github.event.pull_request.title }}): ${{ github.event.pull_request.html_url }}."
             
       - name: PR Merged
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
         run: >
-            ${{ env.send_message }} "${{ env.whodoneit }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+            ${{ env.send_message }} "${{ env.whodoneit }} has merged pull request #${{ github.event.number }} (${{ github.event.pull_request.title }}): ${{ github.event.pull_request.html_url }}."
