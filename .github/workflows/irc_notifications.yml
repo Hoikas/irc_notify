@@ -24,24 +24,28 @@ jobs:
         env:
           message: |
             "${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
+        run: ":"
         
       - name: PR Opened
         if: github.event_name == "pull_request" && github.event.action == "opened"
         env:
           message: |
-            "${{ github.actor }} has opened pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+            "${{ github.actor }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.url }}."
+        run: ":"
         
       - name: PR Closed
         if: github.event_name == "pull_request" && github.event.action == "closed" && !github.event.pull_request.merged
         env:
           message: |
-            "${{ github.actor }} has closed pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+            "${{ github.actor }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.url }}."
+        run: ":"
 
       - name: PR Merged
         if: github.event_name == "pull_request" && github.event.action == "closed" && github.event.pull_request.merged
         env:
           message: |
-            "${{ github.actor }} has merged pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+            "${{ github.actor }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.url }}."
+        run: ":"
 
       - name: Notify
         uses: rectalogic/notify-irc@v1
