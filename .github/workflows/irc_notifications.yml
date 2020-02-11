@@ -10,63 +10,145 @@ on:
 env:
   channel: "#notifications_test"
   nick: Neferus
-  notice: false
   server: irc.guildofwriters.org 
   port: 6667
-  tls: false
+  filename: notify_irc.py 
 
 jobs:
   notification:
+    env:
+      send_message: python3 ${{ env.filename }} --server ${{ env.server }} --channel ${{ env.channel }} -p ${{ env.port }} --no-join --message
+
     runs-on: ubuntu-latest
     steps:
+      - name: Install Dependencies
+        run: pip3 install pure-sasl pydle
+        
+      - name: Write Script
+        run: |
+          cat << EOF > ${{ env.filename }}
+          #! /usr/bin/env python
+
+          import argparse
+          import codecs
+          import logging
+
+          import pydle
+
+          log = logging.getLogger(__name__)
+
+
+          class NotifyIRC(pydle.Client):
+              def __init__(self, channel, channel_key, notification, use_notice=False, skip_join=False, **kwargs):
+                  super().__init__(**kwargs)
+                  self.channel = channel if channel.startswith("#") else f"#{channel}"
+                  self.channel_key = channel_key
+                  self.notification = notification
+                  self.use_notice = use_notice
+                  self.skip_join = skip_join
+                  self.future = None
+
+              async def on_connect(self):
+                  await super().on_connect()
+                  if self.use_notice or self.skip_join:
+                      if self.skip_join:
+                          await self.message(self.channel, self.notification)
+                      else:
+                          await self.notice(self.channel, self.notification)
+                      # Need to issue a command and await the response before we quit,
+                      # otherwise we are disconnected before the notice is processed
+                      self.future = self.eventloop.create_future()
+                      await self.rawmsg("VERSION")
+                      await self.future
+                      await self.quit()
+                  else:
+                      await self.join(self.channel, self.channel_key)
+
+              async def on_join(self, channel, user):
+                  await super().on_join(channel, user)
+                  if user != self.nickname:
+                      return
+                  await self.message(self.channel, self.notification)
+                  await self.part(self.channel)
+
+              async def on_part(self, channel, user, message=None):
+                  await super().on_part(channel, user, message)
+                  await self.quit()
+
+              async def on_raw_351(self, message):
+                  """VERSION response"""
+                  if self.future:
+                      self.future.set_result(None)
+
+
+          def get_args():
+              parser = argparse.ArgumentParser()
+              parser.add_argument("--server", default="chat.freenode.net")
+              parser.add_argument("-p", "--port", default=6667, type=int)
+              parser.add_argument("--password", default=None, help="Optional server password")
+              parser.add_argument("--nickname", default="github-notify")
+              parser.add_argument(
+                  "--sasl-password", help="Nickname password for SASL authentication"
+              )
+              parser.add_argument("--channel", required=True, help="IRC #channel")
+              parser.add_argument("--channel-key", help="IRC #channel password")
+              parser.add_argument("--tls", action="store_true")
+              join_group = parser.add_mutually_exclusive_group()
+              join_group.add_argument("--notice", action="store_true", help="Use NOTICE instead if PRIVMSG")
+              join_group.add_argument("--no-join", action="store_true", help="Do not JOIN to send the PRIVMSG")
+              parser.add_argument("--message", required=True)
+              parser.add_argument("--verbose", action="store_true")
+              return parser.parse_args()
+
+
+          def main():
+              args = get_args()
+              logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
+
+              # Generate some extra fallback nicknames
+              fallback_nicks = []
+              fallback_nicks.append(args.nickname[::-1])
+              fallback_nicks.append(codecs.encode(args.nickname, "rot_13"))
+              fallback_nicks.append(codecs.encode(args.nickname[::-1], "rot_13"))
+
+              client = NotifyIRC(
+                  channel=args.channel,
+                  channel_key=args.channel_key or None,
+                  notification=args.message,
+                  use_notice=args.notice,
+                  skip_join=args.no_join,
+                  nickname=args.nickname,
+                  fallback_nicknames=fallback_nicks,
+                  sasl_username=args.nickname,
+                  sasl_password=args.sasl_password or None,
+              )
+              client.run(
+                  hostname=args.server,
+                  port=args.port,
+                  password=args.password or None,
+                  tls=args.tls,
+              )
+
+
+          if __name__ == "__main__":
+              main()
+        
       - name: Push
         if: github.event_name == 'push'
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: ${{ env.channel }}
-          nickname: ${{ env.nick }}
-          notice: ${{ env.notice }}  
-          server: ${{ env.server }} 
-          port: ${{ env.port }}
-          tls: ${{ env.tls }}
-          message: |-
-            ${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}.
+        run: > 
+          ${{ env.send_message }} "${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
           
       - name: PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: ${{ env.channel }}
-          nickname: ${{ env.nick }}
-          notice: ${{ env.notice }}  
-          server: ${{ env.server }} 
-          port: ${{ env.port }}
-          tls: ${{ env.tls }}
-          message: |-  
-            ${{ github.actor }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}.
+        run: >
+          ${{ env.send_message }} "${{ github.actor }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
               
       - name: PR Closed
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && !github.event.pull_request.merged
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: ${{ env.channel }}
-          nickname: ${{ env.nick }}
-          notice: ${{ env.notice }}  
-          server: ${{ env.server }} 
-          port: ${{ env.port }}
-          tls: ${{ env.tls }}
-          message: |-
-            ${{ github.actor }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}.
+        run: >
+          ${{ env.send_message }} "${{ github.actor }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
             
       - name: PR Merged
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
-        uses: rectalogic/notify-irc@v1
-        with:
-          channel: ${{ env.channel }}
-          nickname: ${{ env.nick }}
-          notice: ${{ env.notice }}  
-          server: ${{ env.server }} 
-          port: ${{ env.port }}
-          tls: ${{ env.tls }}
-          message: |-
-            ${{ github.actor }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}.
+        run: >
+            ${{ env.send_message }} "${{ github.actor }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
