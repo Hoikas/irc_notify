@@ -10,15 +10,14 @@ on:
 jobs:
   notification:
     env:
-      send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --no-join --message
+      send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --nickname Neferus --no-join --message
 
     runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies
         run: |
-          sudo apt update
           sudo apt install python3-setuptools
-          pip3 install pure-sasl pydle
+          pip3 install pydle
         
       - name: Write Script
         run: |
@@ -132,7 +131,7 @@ jobs:
       - name: Push
         if: github.event_name == 'push'
         run: > 
-          ${{ env.send_message }} "${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
+          ${{ env.send_message }} "${{ github.actor }} has pushed ${{ github.event.size}} commit(s) to ${{ github.repository }}: ${{ github.event.compare }}."
           
       - name: PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
