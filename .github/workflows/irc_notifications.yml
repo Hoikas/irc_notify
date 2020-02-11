@@ -2,7 +2,6 @@ name: Notifications
 on: [push]
 
 env:
-  irc_action: Gottox/irc-message-action@v1 
   channel: "#notifications_test"
   nick: Neferus
   notice: false 
@@ -17,7 +16,7 @@ jobs:
 
     steps:
       - name: Notification
-        uses: ${{ env.irc_action }}
+        uses: Gottox/irc-message-action@v1 
         with:
           channel: ${{ env.channel }}
           nickname: ${{ env.nick }}
