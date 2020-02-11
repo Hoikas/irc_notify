@@ -1,0 +1,17 @@
+name: CI
+
+on: [push]
+
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    name: IRC Notifications
+
+    steps:
+      - name: Notification
+        uses: Gottox/irc-message-action@v1
+        with:
+          channel: '#notifications_test'
+          nickname: Neferus
+          message: |-
+            ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
