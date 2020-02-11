@@ -1,10 +1,16 @@
 name: Notifications
-on: [push]
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, closed, ready_for_review]
 
 env:
   channel: "#notifications_test"
   nick: Neferus
-  notice: false 
+  notice: true
   server: irc.guildofwriters.org 
   port: 6667
   tls: false
@@ -12,11 +18,34 @@ env:
 jobs:
   notification:
     runs-on: ubuntu-latest
-    name: IRC Notifications
-
     steps:
-      - name: Notification
-        uses: Gottox/irc-message-action@v1 
+      - name: Notify
+        uses: rectalogic/notify-irc@v1
+        
+        # On push
+        if: github.event_name == "push"
+        env:
+          message: -|
+              "${{ github.actor }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
+        
+        # On opening a pull request
+        if: github.event_name == "pull_request" && github.event.action == "opened"
+        env:
+          message: -|
+              "${{ github.actor }} has opened pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+        
+        # On closing a pull request (not merged)
+        if: github.event_name == "pull_request" && github.event.action == "closed" && !github.event.pull_request.merged
+        env:
+          message: -|
+              "${{ github.actor }} has closed pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+
+        # On merging a pull request
+        if: github.event_name == "pull_request" && github.event.action == "closed" && github.event.pull_request.merged
+        env:
+          message: -|
+              "${{ github.actor }} has merged pull request #{{ github.event.number }}: {{ $github.event.pull_request.url }}."
+
         with:
           channel: ${{ env.channel }}
           nickname: ${{ env.nick }}
@@ -24,5 +53,4 @@ jobs:
           server: ${{ env.server }} 
           port: ${{ env.port }}
           tls: ${{ env.tls }}
-          message: |-
-            ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
+          message: ${{ env.message }}
