@@ -11,6 +11,7 @@ jobs:
   notification:
     env:
       send_message: python3 notify_irc.py --server irc.guildofwriters.org --channel notifications_test -p 6667 --nickname Neferus --no-join --message
+      whodoneit: "\u001B[1m${{ github.actor }}\u001B[0m" 
 
     runs-on: ubuntu-latest
     steps:
@@ -131,19 +132,19 @@ jobs:
       - name: Push
         if: github.event_name == 'push'
         run: > 
-          ${{ env.send_message }} "${{ github.actor }} has pushed ${{ github.event.size}} commit(s) to ${{ github.repository }}: ${{ github.event.compare }}."
+          ${{ env.send_message }} "${{ env.whodoneit }} has pushed to ${{ github.repository }}: ${{ github.event.compare }}."
           
       - name: PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: >
-          ${{ env.send_message }} "${{ github.actor }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+          ${{ env.send_message }} "${{ env.whodoneit }} has opened pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
               
       - name: PR Closed
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && !github.event.pull_request.merged
         run: >
-          ${{ env.send_message }} "${{ github.actor }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+          ${{ env.send_message }} "${{ env.whodoneit }} has closed pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
             
       - name: PR Merged
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
         run: >
-            ${{ env.send_message }} "${{ github.actor }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
+            ${{ env.send_message }} "${{ env.whodoneit }} has merged pull request #${{ github.event.number }}: ${{ github.event.pull_request.html_url }}."
