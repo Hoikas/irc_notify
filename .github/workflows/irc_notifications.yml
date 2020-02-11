@@ -14,5 +14,6 @@ jobs:
           channel: '#notifications_test'
           nickname: Neferus
           server: guildofwriters.org 
+          port: 6667  
           message: |-
             ${{ github.actor }} pushed to ${{ github.event.repository.full_name }}: ${{ github.event.compare }}
