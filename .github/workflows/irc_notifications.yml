@@ -4,6 +4,7 @@ on: [push]
 env:
   channel: "#notifications_test"
   nick: Neferus
+  notice: true 
   server: irc.guildofwriters.org 
   port: 6667
   tls: false
@@ -19,6 +20,7 @@ jobs:
         with:
           channel: ${{ env.channel }}
           nickname: ${{ env.nick }}
+          notice: ${{ env.notice }}  
           server: ${{ env.server }} 
           port: ${{ env.port }}
           tls: ${{ env.tls }}
