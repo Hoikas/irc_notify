@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Notification
-        uses: Gottox/irc-message-action@v1
+        uses: rectalogic/notify-irc@v1
         with:
           channel: ''##notifications_test'
           nickname: Neferus
